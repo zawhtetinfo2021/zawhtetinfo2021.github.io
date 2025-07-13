@@ -10,7 +10,6 @@ const errorMsg       = document.getElementById('errorMsg');
 const toggleToolsBtn = document.getElementById('toggleToolsBtn');
 const toolsPanel     = document.getElementById('toolsPanel');
 
-/* ─── Hard‑coded demo users ─── */
 const users = {
   alice: '1234',
   bob:   'abcd',
@@ -20,7 +19,6 @@ const users = {
 let username = '';
 const messagesRef = db.ref('messages');
 
-// ─────────────── Login ───────────────
 loginForm.addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('username').value.trim().toLowerCase();
@@ -34,13 +32,12 @@ loginForm.addEventListener('submit', e => {
   username = name;
   errorMsg.textContent = '';
   loginPage.style.display = 'none';
-  chatPage.style.display  = 'block';
+  chatPage.style.display  = 'flex';
   userTitle.textContent   = `Lover Chat — ${username}`;
 
   if (Notification.permission === 'default') Notification.requestPermission();
 });
 
-// ─────────────── Send message ───────────────
 chatForm.addEventListener('submit', e => {
   e.preventDefault();
   const text = messageInput.value.trim();
@@ -49,4 +46,30 @@ chatForm.addEventListener('submit', e => {
   messageInput.value = '';
 });
 
-// ─────────────── Receive messages ───────────────
+messagesRef.on('child_added', snapshot => {
+  const data = snapshot.val();
+  const msg = document.createElement('div');
+  msg.className = 'msg';
+  if (data.name === username) msg.classList.add('mine');
+  msg.innerHTML = `<strong>${data.name}:</strong> ${data.message}`;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  if (data.name !== username && Notification.permission === 'granted') {
+    new Notification(`${data.name}: ${data.message}`);
+  }
+});
+
+toggleToolsBtn.addEventListener('click', () => {
+  toolsPanel.style.display = toolsPanel.style.display === 'none' ? 'flex' : 'none';
+});
+
+document.getElementById('sendPhotoBtn').onclick = () => alert("Send Photo not implemented.");
+document.getElementById('sendFileBtn').onclick = () => alert("Send File not implemented.");
+document.getElementById('sendLocationBtn').onclick = () => alert("Send Location not implemented.");
+document.getElementById('emojiBtn').onclick = () => messageInput.value += '😀';
+document.getElementById('giftBtn').onclick = () => alert("Send Gift not implemented.");
+
+function startVoiceCall() { alert("Voice Call feature coming soon."); }
+function startVideoCall() { alert("Video Call feature coming soon."); }
+function logout() { location.reload(); }

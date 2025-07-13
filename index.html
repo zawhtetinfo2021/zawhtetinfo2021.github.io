@@ -3,16 +3,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Lover Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Llover Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="style.css">
-
-  <!-- Firebase SDK (compat keeps firebase.* namespace) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-
   <script>
-    // ⚠️ Keep these private in production
     const firebaseConfig = {
       apiKey: "AIzaSyBRJflSHjfhsdFL03YbRFmkffnoyuYvQnA",
       authDomain: "publicchatapp-d538a.firebaseapp.com",
@@ -28,7 +24,6 @@
 </head>
 <body>
   <div id="app">
-    <!-- Login Page -->
     <div class="login-container" id="loginPage">
       <h1>Lover Chat</h1>
       <p class="subtitle">Demo users → alice/1234, bob/abcd, zaw/love</p>
@@ -40,7 +35,6 @@
       </form>
     </div>
 
-    <!-- Chat Page -->
     <div class="chat-container" id="chatPage" style="display:none;">
       <div class="chat-header">
         <h2 id="userTitle">Lover Chat</h2>
