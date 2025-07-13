@@ -14,7 +14,7 @@ const fileInput      = document.getElementById('fileInput');
 
 const users = {
   alice: '1234',
-  bob:   'abcd',
+  chit:   'love',
   zaw:   'love'
 };
 
