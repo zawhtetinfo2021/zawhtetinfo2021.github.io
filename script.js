@@ -21,7 +21,7 @@ const users = {
 let username = '';
 const messagesRef = db.ref('messages');
 
-// -------- Login --------
+// Login form submit handler
 loginForm.addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('username').value.trim().toLowerCase();
@@ -35,56 +35,78 @@ loginForm.addEventListener('submit', e => {
   username = name;
   errorMsg.textContent = '';
   loginPage.style.display = 'none';
-  chatPage.style.display  = 'flex';
-  userTitle.textContent   = `Lover Chat — ${username}`;
+  chatPage.style.display = 'flex';
+  userTitle.textContent = `Lover Chat — ${username}`;
 
-  if (Notification.permission === 'default') Notification.requestPermission();
+  // Request notification permission if not already granted/denied
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
 
-  // Load existing messages once user logs in
-  loadMessages();
+  startListeningMessages();
 });
 
-function loadMessages() {
+// Listen for new messages in real-time
+function startListeningMessages() {
   chatBox.innerHTML = '';
-  messagesRef.off(); // detach previous listeners
+  messagesRef.off();
   messagesRef.on('child_added', snapshot => {
     const data = snapshot.val();
     appendMessage(data);
+
+    // Show notification only if the message is from other users
+    if (data.name !== username && Notification.permission === 'granted') {
+      let notifText = '';
+      switch (data.type) {
+        case 'text':
+          notifText = data.message;
+          break;
+        case 'photo':
+          notifText = 'Sent a photo 📷';
+          break;
+        case 'file':
+          notifText = 'Sent a file 📁';
+          break;
+        case 'location':
+          notifText = 'Shared location 📍';
+          break;
+        case 'gift':
+          notifText = 'Sent a gift 🎁';
+          break;
+        default:
+          notifText = 'Sent a message';
+      }
+      new Notification(`${data.name}: ${notifText}`);
+    }
   });
 }
 
-// -------- Append message UI --------
 function appendMessage(data) {
   const msg = document.createElement('div');
   msg.className = 'msg';
-  msg.classList.toggle('mine', data.name === username);
-
-  if (data.type === 'text') {
-    msg.innerHTML = `<strong>${data.name}:</strong> ${escapeHtml(data.message)}`;
+  if (data.name === username) {
+    msg.classList.add('mine');
+  }
+  if (data.type === 'text' || !data.type) {
+    msg.innerHTML = `<strong>${escapeHtml(data.name)}:</strong> ${escapeHtml(data.message)}`;
   } else if (data.type === 'photo') {
-    msg.innerHTML = `<strong>${data.name}:</strong><br><img src="${data.url}" alt="Photo message" style="max-width:250px; border-radius: 12px;" />`;
+    msg.innerHTML = `<strong>${escapeHtml(data.name)}:</strong><br><img src="${data.url}" alt="Photo" style="max-width:250px; border-radius: 12px;">`;
   } else if (data.type === 'file') {
-    msg.innerHTML = `<strong>${data.name}:</strong><br><a href="${data.url}" target="_blank" rel="noopener noreferrer" style="color:${data.name === username ? '#fff' : '#000'}; text-decoration: underline;">📁 ${escapeHtml(data.fileName)}</a>`;
+    msg.innerHTML = `<strong>${escapeHtml(data.name)}:</strong><br><a href="${data.url}" target="_blank" rel="noopener noreferrer" style="color:${data.name === username ? '#fff' : '#000'}; text-decoration: underline;">📁 ${escapeHtml(data.fileName)}</a>`;
   } else if (data.type === 'location') {
-    msg.innerHTML = `<strong>${data.name}:</strong><br><a href="https://maps.google.com/?q=${data.latitude},${data.longitude}" target="_blank" rel="noopener noreferrer">📍 Shared Location</a>`;
+    msg.innerHTML = `<strong>${escapeHtml(data.name)}:</strong><br><a href="https://maps.google.com/?q=${data.latitude},${data.longitude}" target="_blank" rel="noopener noreferrer">📍 Shared Location</a>`;
   } else if (data.type === 'gift') {
-    msg.innerHTML = `<strong>${data.name}:</strong><br><span style="font-size: 40px;">${data.gift}</span>`;
+    msg.innerHTML = `<strong>${escapeHtml(data.name)}:</strong><br><span style="font-size:40px;">${escapeHtml(data.gift)}</span>`;
   }
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
-
-  if (data.name !== username && Notification.permission === 'granted') {
-    const notifMsg = data.type === 'text' ? data.message : (data.type === 'gift' ? 'Sent a gift 🎁' : `Sent a ${data.type}`);
-    new Notification(`${data.name}: ${notifMsg}`);
-  }
 }
 
-// Escape HTML helper
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, m => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[m]));
 }
 
-// -------- Send Text Message --------
+// Send text message
 chatForm.addEventListener('submit', e => {
   e.preventDefault();
   const text = messageInput.value.trim();
@@ -95,16 +117,15 @@ chatForm.addEventListener('submit', e => {
 });
 
 function sendMessage(data) {
-  const msgData = { name: username, ts: Date.now(), ...data };
-  messagesRef.push(msgData);
+  messagesRef.push({ name: username, ts: Date.now(), ...data });
 }
 
-// -------- Toggle tools panel --------
+// Toggle tools panel
 toggleToolsBtn.addEventListener('click', () => {
   toolsPanel.style.display = toolsPanel.style.display === 'none' ? 'flex' : 'none';
 });
 
-// -------- Send Photo --------
+// Send photo
 document.getElementById('sendPhotoBtn').onclick = () => {
   photoInput.click();
 };
@@ -124,46 +145,38 @@ photoInput.addEventListener('change', () => {
   toolsPanel.style.display = 'none';
 });
 
-// -------- Send File --------
+// Send file
 document.getElementById('sendFileBtn').onclick = () => {
   fileInput.click();
 };
 fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
   if (!file) return;
-
-  // Read file as base64 URL to store (not ideal for big files, but demo)
   const reader = new FileReader();
   reader.onload = e => {
-    // We store base64 URL for demo, you might want to upload to storage instead
-    sendMessage({
-      type: 'file',
-      url: e.target.result,
-      fileName: file.name
-    });
+    sendMessage({ type: 'file', url: e.target.result, fileName: file.name });
   };
   reader.readAsDataURL(file);
   fileInput.value = '';
   toolsPanel.style.display = 'none';
 });
 
-// -------- Send Location --------
+// Send location
 document.getElementById('sendLocationBtn').onclick = () => {
   if (!navigator.geolocation) {
     alert('Geolocation is not supported by your browser');
     return;
   }
   toolsPanel.style.display = 'none';
-  navigator.geolocation.getCurrentPosition(pos => {
-    sendMessage({
-      type: 'location',
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude
-    });
-  }, () => alert('Unable to get your location.'));
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      sendMessage({ type: 'location', latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+    },
+    () => alert('Unable to get your location.')
+  );
 };
 
-// -------- Emoji --------
+// Emoji picker (simple prompt)
 document.getElementById('emojiBtn').onclick = () => {
   const emoji = prompt('Select emoji: 😀 😃 😄 😁 😆 😂 🥰 😎 😉 😊 🤗 🤩 😍 😜 🤔');
   if (emoji) {
@@ -173,7 +186,7 @@ document.getElementById('emojiBtn').onclick = () => {
   toolsPanel.style.display = 'none';
 };
 
-// -------- Gift --------
+// Gift picker (simple prompt)
 document.getElementById('giftBtn').onclick = () => {
   const gift = prompt('Send a gift emoji (e.g. 🎁 🎉 🎂 🌹 💎 🧸 🍫 🍰)');
   if (gift) {
@@ -182,7 +195,13 @@ document.getElementById('giftBtn').onclick = () => {
   toolsPanel.style.display = 'none';
 };
 
-// -------- Voice / Video Call placeholders --------
-function startVoiceCall() { alert("Voice Call feature coming soon."); }
-function startVideoCall() { alert("Video Call feature coming soon."); }
-function logout() { location.reload(); }
+// Voice/video call placeholders
+function startVoiceCall() {
+  alert('Voice Call feature coming soon.');
+}
+function startVideoCall() {
+  alert('Video Call feature coming soon.');
+}
+function logout() {
+  location.reload();
+}

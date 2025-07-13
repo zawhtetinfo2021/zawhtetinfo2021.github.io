@@ -1,11 +1,10 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Llover Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
   <script>
@@ -28,8 +27,8 @@
       <h1>Lover Chat</h1>
       <p class="subtitle">Demo users → alice/1234, bob/abcd, zaw/love</p>
       <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
         <button type="submit">Login</button>
         <p class="error" id="errorMsg"></p>
       </form>
@@ -45,7 +44,7 @@
         </div>
       </div>
 
-      <div class="chat-box" id="chatBox"></div>
+      <div class="chat-box" id="chatBox" aria-live="polite" aria-relevant="additions"></div>
 
       <form id="chatForm" class="chat-form">
         <button type="button" id="toggleToolsBtn" title="More options">＋</button>
@@ -56,7 +55,7 @@
           <button type="button" id="emojiBtn" title="Emoji">😀</button>
           <button type="button" id="giftBtn" title="Send Gift">🎁</button>
         </div>
-        <input type="text" id="messageInput" placeholder="Type your message…" autocomplete="off">
+        <input type="text" id="messageInput" placeholder="Type your message…" autocomplete="off" />
         <button type="submit">Send</button>
         <input type="file" id="photoInput" accept="image/*" style="display:none;" />
         <input type="file" id="fileInput" style="display:none;" />
