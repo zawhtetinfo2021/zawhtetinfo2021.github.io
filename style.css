@@ -5,7 +5,7 @@ body{font-family:system-ui,Arial,sans-serif;background:#f1f1f1;color:#222}
 /* Login */
 .login-container{max-width:400px;margin:60px auto;padding:30px;border-radius:12px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.08);text-align:center}
 .login-container h1{font-size:1.8rem;margin-bottom:.25rem}
-.subtitle{color:#666;margin-bottom:1.2rem}
+.subtitle{color:#666;margin-bottom:1.2rem;font-size:.9rem}
 .login-container input,.login-container button{width:100%;padding:12px;font-size:1rem;margin:8px 0;border:1px solid #ccc;border-radius:8px}
 .login-container button{background:#0077ff;color:#fff;border:none;cursor:pointer}
 .login-container button:hover{background:#005fd6}

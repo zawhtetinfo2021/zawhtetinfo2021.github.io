@@ -10,24 +10,33 @@ const errorMsg       = document.getElementById('errorMsg');
 const toggleToolsBtn = document.getElementById('toggleToolsBtn');
 const toolsPanel     = document.getElementById('toolsPanel');
 
-let username = "";
+/* ─── Hard‑coded demo users ─── */
+const users = {
+  alice: '1234',
+  bob:   'abcd',
+  zaw:   'love'
+};
+
+let username = '';
 const messagesRef = db.ref('messages');
 
 // ─────────────── Login ───────────────
 loginForm.addEventListener('submit', e => {
   e.preventDefault();
-  const name = document.getElementById('username').value.trim();
+  const name = document.getElementById('username').value.trim().toLowerCase();
   const pass = document.getElementById('password').value.trim();
-  if (!name || !pass) {
-    errorMsg.textContent = 'Username and password are required.';
+
+  if (!users[name] || users[name] !== pass) {
+    errorMsg.textContent = 'Invalid username or password.';
     return;
   }
+
   username = name;
+  errorMsg.textContent = '';
   loginPage.style.display = 'none';
   chatPage.style.display  = 'block';
   userTitle.textContent   = `Lover Chat — ${username}`;
 
-  // Ask notification permission once
   if (Notification.permission === 'default') Notification.requestPermission();
 });
 
@@ -40,32 +49,4 @@ chatForm.addEventListener('submit', e => {
   messageInput.value = '';
 });
 
-// ─────────────── Receive new messages ───────────────
-messagesRef.on('child_added', snap => {
-  const { name, message } = snap.val();
-  const bubble = document.createElement('div');
-  bubble.className = 'msg' + (name === username ? ' mine' : '');
-  bubble.innerHTML = `<strong>${name}:</strong> ${message}`;
-  chatBox.appendChild(bubble);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  if (document.hidden && name !== username && Notification.permission === 'granted') {
-    new Notification(`${name}: ${message}`);
-  }
-});
-
-// ─────────────── UI helpers ───────────────
-toggleToolsBtn.addEventListener('click', () => {
-  toolsPanel.style.display = toolsPanel.style.display === 'none' ? 'flex' : 'none';
-});
-
-['sendPhotoBtn','sendFileBtn','sendLocationBtn','emojiBtn','giftBtn'].forEach(id => {
-  document.getElementById(id).onclick = () => alert(`${id} not implemented yet.`);
-});
-
-document.getElementById('emojiBtn').onclick = () => messageInput.value += '😊';
-
-// ─────────────── Future features ───────────────
-function startVoiceCall(){ alert('Voice call coming soon.'); }
-function startVideoCall(){ alert('Video call coming soon.'); }
-function logout(){ location.reload(); }
+// ─────────────── Receive messages ───────────────
