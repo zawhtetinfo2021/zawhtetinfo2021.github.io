@@ -1,69 +1,434 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Llover Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBRJflSHjfhsdFL03YbRFmkffnoyuYvQnA",
-      authDomain: "publicchatapp-d538a.firebaseapp.com",
-      databaseURL: "https://publicchatapp-d538a-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "publicchatapp-d538a",
-      storageBucket: "publicchatapp-d538a.appspot.com",
-      messagingSenderId: "942113824505",
-      appId: "1:942113824505:web:11f74ec706e6f6cb0b0c28"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-  </script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Viber-like Chat UI with Attachments</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e6e6e6;
+  }
+  #chat-container {
+    max-width: 600px;
+    margin: 0 auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+  }
+  /* Chat header */
+  #chat-header {
+    background: #665ca7;
+    color: white;
+    padding: 15px;
+    font-weight: 600;
+    font-size: 20px;
+    text-align: center;
+  }
+  /* Messages list */
+  #messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background: #f3f3f3;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .message {
+    max-width: 75%;
+    padding: 8px 12px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.3;
+    word-wrap: break-word;
+  }
+  .sent {
+    align-self: flex-end;
+    background: #665ca7;
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .received {
+    align-self: flex-start;
+    background: #e0e0e0;
+    color: #333;
+    border-bottom-left-radius: 4px;
+  }
+  /* Attachments style */
+  .message img, .message audio {
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+  }
+  /* Chat input area */
+  #chat-input-area {
+    padding: 8px 10px;
+    border-top: 1px solid #ddd;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #plus-btn {
+    width: 36px;
+    height: 36px;
+    background: #665ca7;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    position: relative;
+  }
+  #plus-btn:focus {
+    outline: none;
+  }
+  #input-text {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+  }
+  #send-btn {
+    background: #665ca7;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  #send-btn:disabled {
+    background: #a89ef0;
+    cursor: default;
+  }
+  /* Popup menu for attachments */
+  #attachment-menu {
+    position: absolute;
+    bottom: 48px;
+    left: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 5px 10px rgb(0 0 0 / 0.12);
+    display: none;
+    padding: 10px;
+    width: 240px;
+    z-index: 1000;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .attachment-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    color: #555;
+    cursor: pointer;
+    user-select: none;
+  }
+  .attachment-option:hover {
+    color: #665ca7;
+  }
+  .attachment-option svg {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 5px;
+    fill: #665ca7;
+  }
+  /* Emoji picker */
+  #emoji-picker {
+    position: absolute;
+    bottom: 48px;
+    right: 60px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 5px 10px rgb(0 0 0 / 0.12);
+    display: none;
+    width: 260px;
+    height: 180px;
+    overflow-y: auto;
+    padding: 10px;
+    z-index: 1000;
+  }
+  #emoji-picker span {
+    font-size: 22px;
+    cursor: pointer;
+    padding: 6px;
+    user-select: none;
+  }
+  #emoji-picker span:hover {
+    background: #e0d4fc;
+    border-radius: 6px;
+  }
+  /* Gift picker modal */
+  #gift-modal-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+  #gift-modal {
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 5px 15px rgb(0 0 0 / 0.25);
+    text-align: center;
+  }
+  #gift-modal h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #665ca7;
+  }
+  .gift-option {
+    display: inline-block;
+    margin: 8px;
+    cursor: pointer;
+    font-size: 48px;
+    user-select: none;
+    transition: transform 0.15s;
+  }
+  .gift-option:hover {
+    transform: scale(1.3);
+  }
+  #gift-close-btn {
+    margin-top: 16px;
+    background: #665ca7;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  /* Responsive for small devices */
+  @media (max-width: 480px) {
+    #chat-container {
+      max-width: 100vw;
+      border: none;
+    }
+    #attachment-menu {
+      left: auto;
+      right: 0;
+    }
+    #emoji-picker {
+      right: 0;
+      bottom: 50px;
+      width: 200px;
+      height: 140px;
+    }
+  }
+</style>
 </head>
 <body>
-  <div id="app">
-    <div class="login-container" id="loginPage">
-      <h1>Lover Chat</h1>
-      <p class="subtitle">Demo users → alice/1234, bob/abcd, zaw/love</p>
-      <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-        <p class="error" id="errorMsg"></p>
-      </form>
+  <div id="chat-container">
+    <div id="chat-header">Chat with Friend</div>
+    <div id="messages" aria-live="polite" aria-relevant="additions"></div>
+    <div id="chat-input-area">
+      <button id="plus-btn" aria-haspopup="true" aria-expanded="false" aria-label="Open attachment menu">+</button>
+      <input id="input-text" type="text" placeholder="Type a message" aria-label="Message input" />
+      <button id="send-btn" disabled aria-label="Send message">Send</button>
+    </div>
+    <!-- Attachment menu -->
+    <div id="attachment-menu" role="menu" aria-label="Attachment options">
+      <div class="attachment-option" role="menuitem" id="photo-option" tabindex="0" aria-label="Send Photo">
+        <svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM7.5 10.5l2.5 3.01L13.5 9l4.5 6H5l2.5-4.5z"/></svg>
+        Photo
+      </div>
+      <div class="attachment-option" role="menuitem" id="file-option" tabindex="0" aria-label="Send File">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM13 9V3.5L18.5 9H13z"/></svg>
+        File
+      </div>
+      <div class="attachment-option" role="menuitem" id="location-option" tabindex="0" aria-label="Send Location">
+        <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5z"/></svg>
+        Location
+      </div>
+      <div class="attachment-option" role="menuitem" id="voice-option" tabindex="0" aria-label="Send Voice Message">
+        <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V7a3 3 0 0 0-6 0v4a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0z"/></svg>
+        Voice
+      </div>
+      <div class="attachment-option" role="menuitem" id="emoji-option" tabindex="0" aria-label="Pick Emoji">
+        <svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0-10-10 10.011 10.011 0 0 0 10 10zm-4-7a1 1 0 0 1 1.707-.707A2.985 2.985 0 0 1 12 15a2.985 2.985 0 0 1 2.293-1.707A1 1 0 0 1 16 15a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1zm-.5-4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 7.5 11zm7 0a1.5 1.5 0 1 1 1.5-1.5 1.5 1.5 0 0 1-1.5 1.5z"/></svg>
+        Emoji
+      </div>
+      <div class="attachment-option" role="menuitem" id="gift-option" tabindex="0" aria-label="Send Gift">
+        <svg viewBox="0 0 24 24"><path d="M20 12v7a2 2 0 0 1-2 2h-4v-9h6zm-8-5h4v3H12zm-6 0h4v3H6zm-2 5v7a2 2 0 0 0 2 2h4v-9H4z"/></svg>
+        Gift
+      </div>
     </div>
 
-    <div class="chat-container" id="chatPage" style="display:none;">
-      <div class="chat-header">
-        <h2 id="userTitle">Lover Chat</h2>
-        <div class="chat-actions">
-          <button onclick="startVoiceCall()" title="Voice Call">📞</button>
-          <button onclick="startVideoCall()" title="Video Call">🎥</button>
-          <button onclick="logout()" class="logout-btn">⏻</button>
-        </div>
+    <!-- Hidden inputs for photo and file -->
+    <input type="file" id="photo-input" accept="image/*" style="display:none" />
+    <input type="file" id="file-input" style="display:none" />
+
+    <!-- Emoji picker -->
+    <div id="emoji-picker" role="list" aria-label="Emoji picker"></div>
+
+    <!-- Gift picker modal -->
+    <div id="gift-modal-bg" role="dialog" aria-modal="true" aria-labelledby="gift-modal-title">
+      <div id="gift-modal">
+        <h2 id="gift-modal-title">Select a Gift</h2>
+        <div id="gift-list" aria-live="polite" aria-relevant="additions"></div>
+        <button id="gift-close-btn">Close</button>
       </div>
-
-      <div class="chat-box" id="chatBox"></div>
-
-      <form id="chatForm" class="chat-form">
-        <button type="button" id="toggleToolsBtn" title="More options">＋</button>
-        <div id="toolsPanel" class="tools-panel" style="display:none;">
-          <button type="button" id="sendPhotoBtn" title="Send Photo">📷</button>
-          <button type="button" id="sendFileBtn" title="Send File">📁</button>
-          <button type="button" id="sendLocationBtn" title="Send Location">📍</button>
-          <button type="button" id="emojiBtn" title="Emoji">😀</button>
-          <button type="button" id="giftBtn" title="Send Gift">🎁</button>
-        </div>
-        <input type="text" id="messageInput" placeholder="Type your message…" autocomplete="off">
-        <button type="submit">Send</button>
-        <input type="file" id="photoInput" accept="image/*" style="display:none;" />
-        <input type="file" id="fileInput" style="display:none;" />
-      </form>
     </div>
   </div>
 
-  <script src="script.js"></script>
-</body>
-</html>
+<script>
+(() => {
+  const messages = document.getElementById('messages');
+  const inputText = document.getElementById('input-text');
+  const sendBtn = document.getElementById('send-btn');
+  const plusBtn = document.getElementById('plus-btn');
+  const attachmentMenu = document.getElementById('attachment-menu');
+  const photoInput = document.getElementById('photo-input');
+  const fileInput = document.getElementById('file-input');
+  const emojiPicker = document.getElementById('emoji-picker');
+  const giftModalBg = document.getElementById('gift-modal-bg');
+  const giftList = document.getElementById('gift-list');
+  const giftCloseBtn = document.getElementById('gift-close-btn');
+
+  // Voice recording vars
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let isRecording = false;
+  let voiceRecordBtn = null;
+
+  // Emoji list (some sample emojis)
+  const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩'];
+
+  // Gifts (unicode emojis)
+  const gifts = ['🎁','🌹','🍫','💎','🎉','🍰','🧸','🍷'];
+
+  // Toggle send button enable
+  inputText.addEventListener('input', () => {
+    sendBtn.disabled = inputText.value.trim() === '';
+  });
+
+  // Send text message
+  sendBtn.addEventListener('click', () => {
+    const text = inputText.value.trim();
+    if (!text) return;
+    addMessage(text, 'sent');
+    inputText.value = '';
+    sendBtn.disabled = true;
+    scrollToBottom();
+  });
+
+  // Add message helper
+  function addMessage(content, type='received', isHTML=false) {
+    const msg = document.createElement('div');
+    msg.classList.add('message', type);
+    if (isHTML) {
+      msg.innerHTML = content;
+    } else {
+      msg.textContent = content;
+    }
+    messages.appendChild(msg);
+    scrollToBottom();
+  }
+
+  // Scroll messages to bottom
+  function scrollToBottom() {
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  // Toggle attachment menu
+  function toggleAttachmentMenu() {
+    if (attachmentMenu.style.display === 'grid') {
+      attachmentMenu.style.display = 'none';
+      plusBtn.setAttribute('aria-expanded', 'false');
+    } else {
+      attachmentMenu.style.display = 'grid';
+      plusBtn.setAttribute('aria-expanded', 'true');
+      // Hide emoji picker if open
+      emojiPicker.style.display = 'none';
+    }
+  }
+
+  plusBtn.addEventListener('click', toggleAttachmentMenu);
+
+  // Clicking outside closes menus
+  document.addEventListener('click', (e) => {
+    if (!plusBtn.contains(e.target) && !attachmentMenu.contains(e.target) && !emojiPicker.contains(e.target)) {
+      attachmentMenu.style.display = 'none';
+      emojiPicker.style.display = 'none';
+      plusBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Photo send
+  document.getElementById('photo-option').addEventListener('click', () => {
+    attachmentMenu.style.display = 'none';
+    photoInput.click();
+  });
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imgHTML = `<img src="${e.target.result}" alt="Sent photo" />`;
+      addMessage(imgHTML, 'sent', true);
+    };
+    reader.readAsDataURL(file);
+    photoInput.value = '';
+  });
+
+  // File send
+  document.getElementById('file-option').addEventListener('click', () => {
+    attachmentMenu.style.display = 'none';
+    fileInput.click();
+  });
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const fileName = file.name;
+    // For demo: create a "download" link that user can click
+    const url = URL.createObjectURL(file);
+    const fileHTML = `<a href="${url}" download="${fileName}" style="color:#fff; text-decoration: underline;">📎 ${fileName}</a>`;
+    addMessage(fileHTML, 'sent', true);
+    fileInput.value = '';
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  });
+
+  // Location send
+  document.getElementById('location-option').addEventListener('click', () => {
+    attachmentMenu.style.display = 'none';
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+    addMessage('Sending location...', 'sent');
+    navigator.geolocation.getCurrentPosition((pos) => {
+      // Remove last "sending" message
+      if (messages.lastChild.textContent === 'Sending location...') {
+       
