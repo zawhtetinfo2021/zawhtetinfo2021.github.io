@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,14 +6,17 @@
   <title>Lover Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+
+  <!-- Firebase SDK (compat keeps the firebase.* namespace you use in script.js) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+
   <script>
+    // ⚠️  Keep these credentials private in production
     const firebaseConfig = {
       apiKey: "AIzaSyBRJflSHjfhsdFL03YbRFmkffnoyuYvQnA",
       authDomain: "publicchatapp-d538a.firebaseapp.com",
-      databaseURL:"https://publicchatapp-d538a-default-rtdb.asia-southeast1.firebasedatabase.app",
+      databaseURL: "https://publicchatapp-d538a-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "publicchatapp-d538a",
       storageBucket: "publicchatapp-d538a.appspot.com",
       messagingSenderId: "942113824505",
@@ -24,6 +28,7 @@
 </head>
 <body>
   <div id="app">
+    <!-- Login Page -->
     <div class="login-container" id="loginPage">
       <h1>Birthday Present</h1>
       <p class="subtitle">Happy Birthday To You</p>
@@ -35,7 +40,8 @@
       </form>
     </div>
 
-    <div class="chat-container" id="chatPage" style="display: none;">
+    <!-- Chat Page -->
+    <div class="chat-container" id="chatPage" style="display:none;">
       <div class="chat-header">
         <h2 id="userTitle">Lover Chat</h2>
         <div class="chat-actions">
@@ -48,7 +54,7 @@
       <div class="chat-box" id="chatBox"></div>
 
       <form id="chatForm" class="chat-form">
-        <button type="button" id="toggleToolsBtn" title="More options">+</button>
+        <button type="button" id="toggleToolsBtn" title="More options">＋</button>
         <div id="toolsPanel" class="tools-panel" style="display:none;">
           <button type="button" id="sendPhotoBtn" title="Send Photo">📷</button>
           <button type="button" id="sendFileBtn" title="Send File">📁</button>
@@ -56,13 +62,14 @@
           <button type="button" id="emojiBtn" title="Emoji">😀</button>
           <button type="button" id="giftBtn" title="Send Gift">🎁</button>
         </div>
-        <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
+        <input type="text" id="messageInput" placeholder="Type your message…" autocomplete="off">
         <button type="submit">Send</button>
-        <input type="file" id="photoInput" accept="image/*" style="display:none">
-        <input type="file" id="fileInput" style="display:none">
+        <input type="file" id="photoInput" accept="image/*" style="display:none;" />
+        <input type="file" id="fileInput" style="display:none;" />
       </form>
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
