@@ -5,27 +5,23 @@
   <title>Lover Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBRJflSHjfhsdFL03YbRFmkffnoyuYvQnA",
+      authDomain: "publicchatapp-d538a.firebaseapp.com",
+      databaseURL: "https://publicchatapp-d538a-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "publicchatapp-d538a",
+      storageBucket: "publicchatapp-d538a.appspot.com",
+      messagingSenderId: "942113824505",
+      appId: "1:942113824505:web:11f74ec706e6f6cb0b0c28"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
 </head>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBRJflSHjfhsdFL03YbRFmkffnoyuYvQnA",
-    authDomain: "publicchatapp-d538a.firebaseapp.com",
-    databaseURL: "https://zawhtetinfo2021.firebaseio.com",
-    projectId: "publicchatapp-d538a",
-    storageBucket: "publicchatapp-d538a.firebasestorage.app",
-    messagingSenderId: "942113824505",
-    appId: "1:942113824505:web:11f74ec706e6f6cb0b0c28"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-</script>
-
 <body>
   <div id="app">
     <div class="login-container" id="loginPage">
@@ -41,37 +37,32 @@
 
     <div class="chat-container" id="chatPage" style="display: none;">
       <div class="chat-header">
-  <h2 id="userTitle">Lover Chat</h2>
-  <div class="chat-actions">
-    <button onclick="startVoiceCall()" title="Voice Call">📞</button>
-    <button onclick="startVideoCall()" title="Video Call">🎥</button>
-    <button onclick="logout()" class="logout-btn">⏻</button>
-  </div>
-</div>
+        <h2 id="userTitle">Lover Chat</h2>
+        <div class="chat-actions">
+          <button onclick="startVoiceCall()" title="Voice Call">📞</button>
+          <button onclick="startVideoCall()" title="Video Call">🎥</button>
+          <button onclick="logout()" class="logout-btn">⏻</button>
+        </div>
+      </div>
 
       <div class="chat-box" id="chatBox"></div>
-      <form id="chatForm" class="chat-form">
-  <button type="button" id="toggleToolsBtn" title="More options">+</button>
-  
-  <div id="toolsPanel" class="tools-panel" style="display:none;">
-    <button type="button" id="sendPhotoBtn" title="Send Photo">📷</button>
-    <button type="button" id="sendFileBtn" title="Send File">📁</button>
-    <button type="button" id="sendLocationBtn" title="Send Location">📍</button>
-    <button type="button" id="emojiBtn" title="Emoji">😀</button>
-    <button type="button" id="giftBtn" title="Send Gift">🎁</button>
-  </div>
-  
-  <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
-  <button type="submit">Send</button>
-  
-  <!-- Hidden inputs for file/photo -->
-  <input type="file" id="photoInput" accept="image/*" style="display:none" />
-  <input type="file" id="fileInput" style="display:none" />
-</form>
 
+      <form id="chatForm" class="chat-form">
+        <button type="button" id="toggleToolsBtn" title="More options">+</button>
+        <div id="toolsPanel" class="tools-panel" style="display:none;">
+          <button type="button" id="sendPhotoBtn" title="Send Photo">📷</button>
+          <button type="button" id="sendFileBtn" title="Send File">📁</button>
+          <button type="button" id="sendLocationBtn" title="Send Location">📍</button>
+          <button type="button" id="emojiBtn" title="Emoji">😀</button>
+          <button type="button" id="giftBtn" title="Send Gift">🎁</button>
+        </div>
+        <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
+        <button type="submit">Send</button>
+        <input type="file" id="photoInput" accept="image/*" style="display:none">
+        <input type="file" id="fileInput" style="display:none">
+      </form>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
